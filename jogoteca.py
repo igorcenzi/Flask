@@ -14,15 +14,15 @@ jogo2 = Jogo('God of War', 'Rack n Slash', 'PS2')
 jogo3 = Jogo('Mortal Kombat', 'Luta', 'PS2')
 lista = [jogo1, jogo2, jogo3]
 
-@app.route('/inicio')
-def ola():
+@app.route('/')
+def index():
     return render_template('lista.html', titulo='Jogos', jogos = lista)
 
 @app.route('/novo')
 def novo():
   return render_template('novo.html', titulo='Novo Jogo')
 
-@app.route('/criar')
+@app.route('/criar',methods = ['POST',])
 def criar():
   nome = request.form['nome']
   categoria = request.form['categoria']
@@ -31,4 +31,4 @@ def criar():
   lista.append(jogo)
   return render_template('lista.html', titulo='Jogos', jogos=lista)
 
-app.run(port=3001)
+app.run(port=3001, debug=True)
