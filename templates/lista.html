@@ -13,9 +13,9 @@
       <table class="table table-striped table-responsive table-bordered">
         <thead class="thead-default">
           <tr>
-            <th>Nome</th>
-            <th>Categoria</th>
-            <th>Console</th>
+            {% for key in jogos[0].__dict__.keys() %}
+            <th>{{ key|title }}</th>
+            {% endfor %}
           </tr>
         </thead>
         <tbody>
