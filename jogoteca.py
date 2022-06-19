@@ -31,4 +31,15 @@ def criar():
   lista.append(jogo)
   return redirect('/')
 
+@app.route('/login')
+def login():
+  return render_template('login.html')
+
+@app.route('/autenticar', methods=['POST',])
+def autenticar():
+  if 'alohomora' == request.form['senha']:
+    return redirect('/')
+  else:
+    return redirect('/login')
+
 app.run(port=3001, debug=True)
