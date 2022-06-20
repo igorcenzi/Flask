@@ -35,6 +35,9 @@ def criar():
   console = request.form['console']
   jogo = Jogo(nome, categoria, console)
   jogo_dao.salvar(jogo)
+
+  arquivo = request.files['arquivo']
+  arquivo.save(f'uploads/{arquivo.filename}')
   return redirect(url_for('index'))
 
 @app.route('/login')
@@ -65,5 +68,29 @@ def logout():
   session['usuario_logado'] = None
   flash('Logout efetuado com sucesso!')
   return redirect(url_for('index'))
+
+@app.route('/editar/<int:id>')
+def editar(id):
+  if 'usuario_logado' not in session or session['usuario_logado'] == None:
+    return redirect(url_for('login', proxima=url_for('editar')))
+  jogo = jogo_dao.busca_por_id(id)
+  return render_template('editar.html', titulo='Editando Jogo', jogo = jogo)
+
+@app.route('/atualizar/<int:id>',methods = ['POST',])
+def atualizar(id):
+  nome = request.form['nome']
+  categoria = request.form['categoria']
+  console = request.form['console']
+  jogo = Jogo(nome, categoria, console, id=id)
+  jogo_dao.salvar(jogo)
+  return redirect(url_for('index'))
+
+@app.route('/deletar/<int:id>')
+def deletar(id):
+  jogo_dao.deletar(id)
+  flash('O jogo foi removido com sucesso!')
+  return redirect(url_for('index'))
+
+
 
 app.run(port=3001, debug=True)
