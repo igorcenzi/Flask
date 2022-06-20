@@ -1,33 +1,25 @@
 from flask import Flask, flash, redirect, render_template, request, session, url_for
+from dao import JogoDao, UsuarioDao
+from flask_mysqldb import MySQL
 
-class Jogo:
-  def __init__(self, nome, categoria, console):
-    self.nome = nome
-    self.categoria = categoria
-    self.console = console
+from models import Jogo, Usuario
 
-class Usuario:
-  def __init__(self, nome, nickname, senha):
-    self.nome = nome
-    self.nickname = nickname
-    self.senha = senha
-
-usuario1 = Usuario('igor', 'iguinho', '1234')
-usuario2 = Usuario('creito', 'creitinho', '5678')
-usuario3 = Usuario('arthur', 'tutu', '1010')
-
-usuarios = { usuario1.nickname: usuario1, usuario2.nickname: usuario2, usuario3.nickname: usuario3 }
 
 app = Flask(__name__)
 app.secret_key = 'segredo'
+app.config['MYSQL_HOST'] = '127.0.0.1'
+app.config['MYSQL_USER'] = 'root'
+app.config['MYSQL_PASSWORD'] = 'root'
+app.config['MYSQL_DB'] = 'jogoteca'
+app.config['MYSQL_PORT'] = 3307
 
-jogo1 = Jogo('Tetris', 'Puzzle', 'Atari')
-jogo2 = Jogo('God of War', 'Rack n Slash', 'PS2')
-jogo3 = Jogo('Mortal Kombat', 'Luta', 'PS2')
-lista = [jogo1, jogo2, jogo3]
+db = MySQL(app)
+jogo_dao = JogoDao(db)
+usuario_dao = UsuarioDao(db)
 
 @app.route('/')
 def index():
+    lista = jogo_dao.listar()
     return render_template('lista.html', titulo='Jogos', jogos = lista)
 
 @app.route('/novo')
@@ -42,7 +34,7 @@ def criar():
   categoria = request.form['categoria']
   console = request.form['console']
   jogo = Jogo(nome, categoria, console)
-  lista.append(jogo)
+  jogo_dao.salvar(jogo)
   return redirect(url_for('index'))
 
 @app.route('/login')
@@ -52,16 +44,18 @@ def login():
 
 @app.route('/autenticar', methods=['POST',])
 def autenticar():
-  if request.form['usuario'] in usuarios:
-    usuario = usuarios[request.form['usuario']]
+  usuario = usuario_dao.buscar_por_id(request.form['usuario'])
+  if usuario:
     if request.form['senha'] == usuario.senha:
       session['usuario_logado'] = usuario.nickname
       flash(usuario.nickname + ' Logado com Sucesso!')
       proxima_pagina = request.form['proxima']
       if proxima_pagina == 'None':
-        print('entrou')
         return redirect(url_for('index'))
       return redirect(proxima_pagina)
+    else:
+      flash('Usuário ou senha incorretos')
+    return redirect(url_for('login'))
   else:
     flash('Usuário não logado!')
     return redirect(url_for('login'))

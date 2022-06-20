@@ -10,6 +10,7 @@
   <tbody>
     {% for jogo in jogos %}
     <tr>
+      <td>{{ jogo.id or "" }}</td>
       <td>{{ jogo.nome }}</td>
       <td>{{ jogo.categoria }}</td>
       <td>{{ jogo.console }}</td>
